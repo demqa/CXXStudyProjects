@@ -6,24 +6,37 @@ This will be my cache emulation in course of C++ in MIPT 2nd year (First task). 
 
 1. Functionality
 
-   Get input stdin:
+   I will take input from stdin and give output to stdout.
+
+   Input:
 
    * cache size
-   * number of elements to check cache
-   * elements to check cache (elements are int)
+   * number of elements to test cache
+   * elements to test cache (elements will be ints for simplicity)
 
-   Give in stdout:
+   Output:
 
    * number of cache-hits
 
-   Emulate cache use with 2Q algorithm. Then compare with perfect cache (which knows the future).
+   Emulate cache use with 2Q algorithm. 
 
-2. Functional tests for cache.
+   I took information about 2Q Algorithm from [article from it's authors](https://www.vldb.org/conf/1994/P439.PDF).
 
-3. Perfect Cache Emulation.
+2. [Ideal Cache][Ideal Cache] Emulation
+   
+   I have to compare results of 2Q cache with [ideal cache][Ideal Cache].
+   
+   * determine when in the future will appear every element
+   * drop the latest from all current elements in cache
+   
+   I have to make 2 algorithms:
+   
+   * the most optimal
+   * least optimal (adequate)
+   
+[Ideal Cache]: https://www.youtube.com/watch?v=xDKnMXtZKq8&t=1598s
 
-   * determine which algorithm will be great to find first element, that should be removed from cache.
-
+3. End-to-end tests.
 
 ## Build
 
