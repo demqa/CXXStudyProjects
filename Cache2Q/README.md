@@ -22,9 +22,9 @@ This will be my cache emulation in course of C++ in MIPT 2nd year (First task). 
 
    I took information about 2Q Algorithm from [article from it's authors](https://www.vldb.org/conf/1994/P439.PDF).
 
-2. [Ideal Cache][Ideal Cache] Emulation
+2. Ideal Cache Emulation
    
-   I have to compare results of 2Q cache with [ideal cache][Ideal Cache].
+   I have to compare results of 2Q cache with [ideal cache](https://www.youtube.com/watch?v=xDKnMXtZKq8&t=1598s).
    
    * determine when in the future will appear every element
    * drop the latest from all current elements in cache
@@ -33,10 +33,8 @@ This will be my cache emulation in course of C++ in MIPT 2nd year (First task). 
    
    * the most optimal
    * least optimal (adequate)
-   
-[Ideal Cache]: https://www.youtube.com/watch?v=xDKnMXtZKq8&t=1598s
 
-3. End-to-end tests.
+3. End-to-end tests
 
 ## Build
 
