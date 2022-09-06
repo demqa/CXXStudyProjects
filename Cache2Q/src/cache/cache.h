@@ -4,7 +4,7 @@
 #include <queue>
 #include <unordered_map>
 
-template <typename T, typename F, typename KeyT = int>
+template <typename T, typename KeyT, typename GetKeyT>
 struct cache_t {
     private:
 
@@ -16,22 +16,25 @@ struct cache_t {
     std::unordered_map<KeyT, ListTIt> htable;
 
     // A1-in
-    std::queue<T>    in;
+    std::deque<T>    in;
     std::size_t      in_maxsize;
 
-    using QueueTIt = typename std::queue<T>::iterator;
-    std::unordered_map<KeyT, QueueTIt> in_htable;
+    using DequeTIt = typename std::deque<T>::iterator;
+    std::unordered_map<KeyT, DequeTIt> in_htable;
 
     // A1-out
-    std::queue<KeyT> out;
+    std::deque<KeyT> out;
     std::size_t      out_maxsize;
 
-    using QueueKeyTIt = typename std::queue<KeyT>::iterator;
-    std::unordered_map<KeyT, QueueKeyTIt> out_htable;
+    using DequeKeyTIt = typename std::deque<KeyT>::iterator;
+    std::unordered_map<KeyT, DequeKeyTIt> out_htable;
+
+    T    (&slow_get_page)(KeyT  key);
+    KeyT (&     get_key) (T    page);
 
     public:
 
-    bool lookup_update(KeyT key, F slow_get_page) {
+    bool lookup_update(KeyT key) {
         auto hit = htable.find(key);
         if (hit != htable.end()) { // found in Am
             auto elem_it = hit->second;
@@ -43,36 +46,62 @@ struct cache_t {
             return true;
         }
 
-        auto out_it = out_htable.find(key);
-        if (out_it != out.end()) { // found in A1-out
-            reclaim_for(key);
+        auto out_hit = out_htable.find(key);
+        if (out_hit != out_htable.end()) { // found in A1-out
+            assert(out_hit->second != out.end());
+
+            reclaim_for();
 
             // add in Am and in htable
-            cache_.push_front(slow_get_page(key));
-            htable.add(cache_.front());
+            T page = slow_get_page(key);
+            cache_.push_front(page);
+            htable[get_key(page)] = cache_.begin();
 
             return true;
         }
 
-        auto in_it = in_htable.find(key);
-        if (in_it != in.end()) { // found in A1-in
+        auto in_hit = in_htable.find(key);
+        if (in_hit != in_htable.end()) { // found in A1-in
+            assert(in_hit->second != in.end());
+
             // skip
             return true;
         }
 
-        reclaim_for(key);
+        reclaim_for();
 
         // add in A1-in & in in_htable
-        in.push(slow_get_page(key));
-        in_htable.add(in.back());
+        T page = slow_get_page(key);
+        in.push_front(page);
+        in_htable[get_key(page)] = in.begin();
 
         return false;
     }
 
-    void reclaim_for(KeyT key) {
-        // to be continued.
-        return;
+    void reclaim_for() {
+        if (in.size() >= in_maxsize) {
+            T coldest_in_page = in.pop();
+
+            if (out.size() >= out_maxsize) {
+                KeyT extra_page_key = out.pop();
+                out_htable.erase(extra_page_key);
+            }
+
+            KeyT key = get_key(coldest_in_page);
+            out.push_front(key);
+            out_htable[key] = out.begin();
+        }
+
+        if (cache_.size() >= size_) {
+            T coldest_cache_page = cache_.pop();
+            htable.erase(get_key(coldest_cache_page));
+        }
     }
 
-    cache_t(std::size_t size): size_(size) { }
+    cache_t(std::size_t size, GetKeyT get_key,  T (&slow_get_page)(KeyT)):
+                 size_(size), get_key(get_key), slow_get_page(slow_get_page) {
+        // change it to optimal values
+        out_maxsize = size;
+        in_maxsize  = size;
+    }
 };
