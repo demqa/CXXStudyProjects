@@ -13,23 +13,19 @@ page_t slow_get_page(key_t key) {
 }
 
 int main() {
-    // cache_t<int, int (*)(int), int, int (*)(int)> cache(5, get_key);
-    //
-    // cache.lookup_update(14, slow_get_page);
 
-    std::unordered_map<int, int> base;
+    // std::size_t n = 0;
+    // std::cin >> n;
 
-    std::vector<int> example;
+    cache_t<int, int> cache(3, get_key, slow_get_page);
 
-    example.push_back(1);
-    example.push_back(2);
-    example.push_back(3);
-    example.push_back(4);
+    std::cout << cache.lookup_update(14) << "\n";
+    std::cout << cache.lookup_update(15) << "\n";
+    std::cout << cache.lookup_update(16) << "\n";
+    std::cout << cache.lookup_update(16) << "\n";
+    std::cout << cache.lookup_update(16) << "\n";
+    std::cout << cache.lookup_update(14) << "\n";
+    std::cout << cache.lookup_update(15) << "\n";
 
-    std::cout << example.front() << "\n";
-
-    base[5] = 6;
-
-    std::cout << base.find(5)->first << " " << base.find(5)->second << "\n";
     return 0;
 }

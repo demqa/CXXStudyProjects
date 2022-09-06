@@ -3,8 +3,9 @@
 #include <list>
 #include <queue>
 #include <unordered_map>
+#include <cassert>
 
-template <typename T, typename KeyT, typename GetKeyT>
+template <typename T, typename KeyT>
 struct cache_t {
     private:
 
@@ -31,6 +32,29 @@ struct cache_t {
 
     T    (&slow_get_page)(KeyT  key);
     KeyT (&     get_key) (T    page);
+
+    void reclaim_for() {
+        if (in.size() >= in_maxsize) {
+            T coldest_in_page = in.back();
+            in.pop_back();
+
+            if (out.size() >= out_maxsize) {
+                KeyT extra_page_key = out.back();
+                out.pop_back();
+                out_htable.erase(extra_page_key);
+            }
+
+            KeyT key = get_key(coldest_in_page);
+            out.push_front(key);
+            out_htable[key] = out.begin();
+        }
+
+        if (cache_.size() >= size_) {
+            T coldest_cache_page = cache_.back();
+            cache_.pop_back();
+            htable.erase(get_key(coldest_cache_page));
+        }
+    }
 
     public:
 
@@ -78,27 +102,7 @@ struct cache_t {
         return false;
     }
 
-    void reclaim_for() {
-        if (in.size() >= in_maxsize) {
-            T coldest_in_page = in.pop();
-
-            if (out.size() >= out_maxsize) {
-                KeyT extra_page_key = out.pop();
-                out_htable.erase(extra_page_key);
-            }
-
-            KeyT key = get_key(coldest_in_page);
-            out.push_front(key);
-            out_htable[key] = out.begin();
-        }
-
-        if (cache_.size() >= size_) {
-            T coldest_cache_page = cache_.pop();
-            htable.erase(get_key(coldest_cache_page));
-        }
-    }
-
-    cache_t(std::size_t size, GetKeyT get_key,  T (&slow_get_page)(KeyT)):
+    cache_t(std::size_t size, KeyT (&get_key)(T page),  T (&slow_get_page)(KeyT key)):
                  size_(size), get_key(get_key), slow_get_page(slow_get_page) {
         // change it to optimal values
         out_maxsize = size;
