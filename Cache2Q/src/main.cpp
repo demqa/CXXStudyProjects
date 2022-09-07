@@ -27,5 +27,7 @@ int main() {
     std::cout << cache.lookup_update(14) << "\n";
     std::cout << cache.lookup_update(15) << "\n";
 
+    cache.dump();
+
     return 0;
 }

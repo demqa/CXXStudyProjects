@@ -1,12 +1,16 @@
 #pragma once
 
 #include <list>
-#include <queue>
+#include <deque>
 #include <unordered_map>
+#include <algorithm>
 #include <cassert>
 
+#include <cstdio>
+
 template <typename T, typename KeyT>
-struct cache_t {
+struct cache_t
+{
     private:
 
     // Am. It is default LRU.
@@ -58,6 +62,15 @@ struct cache_t {
 
     public:
 
+    cache_t(std::size_t size, KeyT (&get_key)(T page),  T (&slow_get_page)(KeyT key)):
+                 size_(size), get_key(get_key), slow_get_page(slow_get_page) {
+        // these 2Q cache parameters are optimal as Algorithm authors
+        // discovered via number of experiments.
+
+         in_maxsize = std::max(size / 2, 1LU);
+        out_maxsize = std::max(size / 4, 1LU);
+    }
+
     bool lookup_update(KeyT key) {
         auto hit = htable.find(key);
         if (hit != htable.end()) { // found in Am
@@ -102,10 +115,25 @@ struct cache_t {
         return false;
     }
 
-    cache_t(std::size_t size, KeyT (&get_key)(T page),  T (&slow_get_page)(KeyT key)):
-                 size_(size), get_key(get_key), slow_get_page(slow_get_page) {
-        // change it to optimal values
-        out_maxsize = size;
-        in_maxsize  = size;
+    void dump() {
+        fprintf(stderr, "-----CACHE DUMP-----\n\n\n");
+        fprintf(stderr, "Am cache %lu/%lu:\n", cache_.size(), size_);
+        for (auto elem: cache_) {
+            fprintf(stderr, "%d ", elem);
+        }
+        fprintf(stderr, "\n\n");
+
+        fprintf(stderr, "A1-in %lu/%lu:\n", in.size(), in_maxsize);
+        for (auto elem: in) {
+            fprintf(stderr, "%d ", elem);
+        }
+        fprintf(stderr, "\n\n");
+
+        fprintf(stderr, "A1-out %lu/%lu:\n", out.size(), out_maxsize);
+        for (auto elem: out) {
+            fprintf(stderr, "%d ", elem);
+        }
+        fprintf(stderr, "\n\n");
+        fprintf(stderr, "-----CACHE DUMP END-----\n");
     }
 };
