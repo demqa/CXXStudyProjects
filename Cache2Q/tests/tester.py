@@ -11,6 +11,8 @@ args = sys.argv[1:]
 
 args[0] = relative_path + args[0]
 
+tmp_file = ".tmp"
+
 number = 1
 while True:
     test_name = "test" + str(number)
@@ -20,7 +22,7 @@ while True:
         break
 
     inputf = open(test_name + ".in", "r")
-    output = open(".tmp", "w+")
+    output = open(tmp_file, "w+")
 
     cmd = args
     subprocess.call(cmd, stdin=inputf, stdout=output)
@@ -72,4 +74,4 @@ while True:
     output.close()
     correct_test_file.close()
 
-    os.remove(".tmp")
+    os.remove(tmp_file)
