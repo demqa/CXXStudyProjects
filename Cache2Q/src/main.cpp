@@ -26,9 +26,9 @@ int main() {
         bool hit = cache.lookup_update(current_elem);
         if (hit) number_of_hits++;
 
-        std::cout << "step №" << index << (hit ? "hit" : "miss") << "\n";
-        cache.dump();
-        std::cout << "\n\n";
+        // std::cout << "step №" << index << " " << (hit ? "hit" : "miss") << "\n";
+        // cache.dump();
+        // std::cout << "\n\n";
     }
 
     std::cout << number_of_hits << "\n";

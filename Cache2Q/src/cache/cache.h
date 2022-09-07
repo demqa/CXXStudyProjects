@@ -82,6 +82,14 @@ public:
             return true;
         }
 
+        auto in_hit = in_htable.find(key);
+        if (in_hit != in_htable.end()) { // found in A1-in
+            assert(in_hit->second != in.end());
+
+            // skip
+            return true;
+        }
+
         auto out_hit = out_htable.find(key);
         if (out_hit != out_htable.end()) { // found in A1-out
             assert(out_hit->second != out.end());
@@ -94,14 +102,6 @@ public:
             htable[get_key(page)] = cache_.begin();
 
             return false;
-        }
-
-        auto in_hit = in_htable.find(key);
-        if (in_hit != in_htable.end()) { // found in A1-in
-            assert(in_hit->second != in.end());
-
-            // skip
-            return true;
         }
 
         reclaim_for_in();
