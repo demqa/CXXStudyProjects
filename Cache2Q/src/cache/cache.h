@@ -9,10 +9,8 @@
 #include <cstdio>
 
 template <typename T, typename KeyT>
-struct cache_t
-{
-    private:
-
+struct cache_t {
+private:
     // Am. It is default LRU.
     std::list<T> cache_;
     std::size_t  size_;
@@ -37,10 +35,19 @@ struct cache_t
     T    (&slow_get_page)(KeyT  key);
     KeyT (&     get_key) (T    page);
 
-    void reclaim_for() {
+    void reclaim_for_cache() {
+        if (cache_.size() >= size_) {
+            T coldest_cache_page = cache_.back();
+            cache_.pop_back();
+            htable.erase(get_key(coldest_cache_page));
+        }
+    }
+
+    void reclaim_for_in() {
         if (in.size() >= in_maxsize) {
             T coldest_in_page = in.back();
             in.pop_back();
+            in_htable.erase(get_key(coldest_in_page));
 
             if (out.size() >= out_maxsize) {
                 KeyT extra_page_key = out.back();
@@ -52,31 +59,23 @@ struct cache_t
             out.push_front(key);
             out_htable[key] = out.begin();
         }
-
-        if (cache_.size() >= size_) {
-            T coldest_cache_page = cache_.back();
-            cache_.pop_back();
-            htable.erase(get_key(coldest_cache_page));
-        }
     }
 
-    public:
-
+public:
     cache_t(std::size_t size, KeyT (&get_key)(T page),  T (&slow_get_page)(KeyT key)):
                  size_(size), get_key(get_key), slow_get_page(slow_get_page) {
         // these 2Q cache parameters are optimal as Algorithm authors
         // discovered via number of experiments.
 
-         in_maxsize = std::max(size / 2, 1LU);
-        out_maxsize = std::max(size / 4, 1LU);
+         in_maxsize = std::max(size / 4, 1LU);
+        out_maxsize = std::max(size / 2, 1LU);
     }
 
     bool lookup_update(KeyT key) {
         auto hit = htable.find(key);
         if (hit != htable.end()) { // found in Am
             auto elem_it = hit->second;
-            if (elem_it != cache_.begin()) {
-                // move elem to head
+            if (elem_it != cache_.begin()) { // move elem to head
                 cache_.splice(cache_.begin(), cache_, elem_it, std::next(elem_it));
             }
 
@@ -87,14 +86,14 @@ struct cache_t
         if (out_hit != out_htable.end()) { // found in A1-out
             assert(out_hit->second != out.end());
 
-            reclaim_for();
+            reclaim_for_cache();
 
             // add in Am and in htable
             T page = slow_get_page(key);
             cache_.push_front(page);
             htable[get_key(page)] = cache_.begin();
 
-            return true;
+            return false;
         }
 
         auto in_hit = in_htable.find(key);
@@ -105,7 +104,7 @@ struct cache_t
             return true;
         }
 
-        reclaim_for();
+        reclaim_for_in();
 
         // add in A1-in & in in_htable
         T page = slow_get_page(key);
@@ -116,24 +115,23 @@ struct cache_t
     }
 
     void dump() {
-        fprintf(stderr, "-----CACHE DUMP-----\n\n\n");
+        fprintf(stderr, "\n-----CACHE DUMP-----\n\n");
+
         fprintf(stderr, "Am cache %lu/%lu:\n", cache_.size(), size_);
-        for (auto elem: cache_) {
+        for (auto elem: cache_)
             fprintf(stderr, "%d ", elem);
-        }
         fprintf(stderr, "\n\n");
 
         fprintf(stderr, "A1-in %lu/%lu:\n", in.size(), in_maxsize);
-        for (auto elem: in) {
+        for (auto elem: in)
             fprintf(stderr, "%d ", elem);
-        }
         fprintf(stderr, "\n\n");
 
         fprintf(stderr, "A1-out %lu/%lu:\n", out.size(), out_maxsize);
-        for (auto elem: out) {
+        for (auto elem: out)
             fprintf(stderr, "%d ", elem);
-        }
         fprintf(stderr, "\n\n");
+
         fprintf(stderr, "-----CACHE DUMP END-----\n");
     }
 };

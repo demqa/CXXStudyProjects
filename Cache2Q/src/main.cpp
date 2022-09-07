@@ -13,21 +13,25 @@ page_t slow_get_page(key_t key) {
 }
 
 int main() {
+    size_t cache_size = 0, number_of_elements = 0;
+    std::cin >> cache_size >> number_of_elements;
 
-    // std::size_t n = 0;
-    // std::cin >> n;
+    cache_t<int, int> cache(cache_size, get_key, slow_get_page);
 
-    cache_t<int, int> cache(3, get_key, slow_get_page);
+    size_t number_of_hits = 0;
+    for (size_t index = 0; index < number_of_elements; ++index) {
+        int current_elem = 0;
+        std::cin >> current_elem;
 
-    std::cout << cache.lookup_update(14) << "\n";
-    std::cout << cache.lookup_update(15) << "\n";
-    std::cout << cache.lookup_update(16) << "\n";
-    std::cout << cache.lookup_update(16) << "\n";
-    std::cout << cache.lookup_update(16) << "\n";
-    std::cout << cache.lookup_update(14) << "\n";
-    std::cout << cache.lookup_update(15) << "\n";
+        bool hit = cache.lookup_update(current_elem);
+        if (hit) number_of_hits++;
 
-    cache.dump();
+        std::cout << "step №" << index << (hit ? "hit" : "miss") << "\n";
+        cache.dump();
+        std::cout << "\n\n";
+    }
+
+    std::cout << number_of_hits << "\n";
 
     return 0;
 }

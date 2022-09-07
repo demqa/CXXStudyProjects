@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-project(Cache2Q VERSION 0.2 LANGUAGES CXX)
+project(Cache2Q VERSION 0.3 LANGUAGES CXX)
 
 add_executable( Cache2Q
     src/main.cpp
