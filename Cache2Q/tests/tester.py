@@ -22,8 +22,8 @@ while True:
     inputf = open(test_name + ".in", "r")
     output = open(".tmp", "w+")
 
-    cmd = args + ["<", test_name]
-    subprocess.call(cmd, stdout=output, stdin=inputf, stderr=None)
+    cmd = args
+    subprocess.call(cmd, stdin=inputf, stdout=output)
 
     output.seek(0)
 
@@ -39,17 +39,37 @@ while True:
     for line in correct_test_file:
         [correct.append(x) for x in line.strip().split(' ')]
 
-    if (len(answer) != len(correct)):
-        print(test_name + " failed.")
-        continue
-
     failed = False
+    if (len(answer) != len(correct)):
+        failed = True
+
     for i in range(len(answer)):
-        if answer[i] != correct[i]:
+        if failed == True or answer[i] != correct[i]:
             failed = True
             break
 
-    if (failed):
-        print(test_name + " failed.")
+    if failed:
+        print(test_name + " FAILED.")
+        inputf.seek(0)
+        output.seek(0)
+        correct_test_file.seek(0)
+
+        print("input:")
+        for line in inputf:
+            print(line, end="")
+
+        print("expected:")
+        for line in correct_test_file:
+            print(line)
+
+        print("got:")
+        for line in output:
+            print(line)
     else:
         print(test_name + " passed.")
+
+    inputf.close()
+    output.close()
+    correct_test_file.close()
+
+    os.remove(".tmp")
