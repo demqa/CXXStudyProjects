@@ -58,15 +58,15 @@ private:
 
     void reclaim_for_in() {
         if (in.size() >= in_maxsize) {
-            T coldest_in_page = in.back();
-            remove_item(in, in_htable, get_key(coldest_in_page));
+            T    coldest_page = in.back();
+            KeyT coldest_key  = get_key(coldest_page);
+            remove_item(in, in_htable, coldest_key);
 
             if (out.size() >= out_maxsize) {
                 remove_item(out, out_htable, out.back());
             }
 
-            KeyT key = get_key(coldest_in_page);
-            add_item(out, out_htable, key);
+            add_item(out, out_htable, coldest_key);
         }
     }
 
@@ -119,6 +119,10 @@ public:
         add_item(in, in_htable, page);
 
         return false;
+    }
+
+    bool full() {
+        return cache_.size() == size_;
     }
 
     void dump() {
