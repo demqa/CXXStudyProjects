@@ -52,7 +52,8 @@ private:
 
     void reclaim_for_cache() {
         if (cache_.size() >= size_) {
-            remove_item(cache_, htable, get_key(cache_.back()));
+            KeyT key = get_key(cache_.back());
+            remove_item(cache_, htable, key);
         }
     }
 
