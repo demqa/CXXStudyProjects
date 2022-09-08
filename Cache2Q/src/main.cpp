@@ -1,5 +1,6 @@
 #include <iostream>
 #include "cache/cache.h"
+#include "cache/ideal_cache.h"
 
 typedef int page_t;
 typedef int key_t;
@@ -18,10 +19,14 @@ int main() {
 
     cache_t<int, int> cache(cache_size, get_key, slow_get_page);
 
+    std::vector<int> array(number_of_elements);
+
     size_t number_of_hits = 0;
     for (size_t index = 0; index < number_of_elements; ++index) {
         int current_elem = 0;
         std::cin >> current_elem;
+
+        array[index] = current_elem;
 
         bool hit = cache.lookup_update(current_elem);
         if (hit) number_of_hits++;
@@ -31,7 +36,14 @@ int main() {
         // std::cout << "\n\n";
     }
 
-    std::cout << number_of_hits << "\n";
+    std::cout << "Cache2Q hits: " << number_of_hits << "\n";
+
+    ideal_cache_t<int, int> ideal_cache(cache_size, get_key, slow_get_page, array);
+
+    size_t number_of_ideal_hits = ideal_cache.count_hits();
+
+    std::cout << "IdealCache hits: " << number_of_ideal_hits << "\n";
+
 
     return 0;
 }
